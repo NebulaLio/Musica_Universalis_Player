@@ -1,155 +1,247 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-TW">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>RHINE LAB · AUDIO ARCHIVE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RHINE LAB · AUDIO ARCHIVE — ANALYSIS OS 3D</title>
+  <!-- Three.js r128 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- 载入动画 -->
+  <!-- Sleek Rhine Lab Ring Boot Loader -->
   <div id="loader" aria-hidden="true">
     <div class="loader-ring">
       <svg viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,123,0,0.18)" stroke-width="1"></circle>
-        <circle class="lr-arc" cx="32" cy="32" r="26" fill="none" stroke="#ff7b00" stroke-width="1.6" stroke-dasharray="163" stroke-dashoffset="163"></circle>
-        <circle cx="32" cy="32" r="3.5" fill="#ff7b00"></circle>
+        <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(128,128,128,0.22)" stroke-width="1.2"></circle>
+        <circle class="lr-arc" cx="32" cy="32" r="26" fill="none" stroke="#ff7b00" stroke-width="1.8" stroke-dasharray="163" stroke-dashoffset="163"></circle>
+        <circle cx="32" cy="32" r="3.4" fill="#ff7b00"></circle>
       </svg>
     </div>
     <div class="loader-brand">RHINE LAB</div>
-    <div class="loader-line"><i id="loaderFill"></i></div>
-    <div class="loader-sub" id="loaderSub">INITIALIZING ARCHIVE…</div>
+    <div class="loader-sub" id="loaderSub">INITIALIZING ARCHIVE</div>
   </div>
 
-  <div class="scan" aria-hidden="true"></div>
+  <!-- Full-Bleed 3D Endless Cartridge Rack -->
+  <div id="sceneWrap">
+    <canvas id="threeCanvas"></canvas>
+  </div>
+  <div class="grain-overlay" aria-hidden="true"></div>
+  <div class="hud-fade-top" aria-hidden="true"></div>
+  <div class="hud-fade-bottom" aria-hidden="true"></div>
 
-  <header class="topbar">
-    <div class="brand">
-      <span class="logo" aria-hidden="true"><i></i></span>
-      <span class="brand-name">RHINE LAB · AUDIO ARCHIVE</span>
+  <!-- Top-Left Frameless Rhine Lab Branding -->
+  <div class="os-brand" aria-label="Rhine Lab Analysis OS">
+    <div class="os-brand-main">RHINE LAB</div>
+    <div class="os-brand-sub">SYNTHESIZE INFORMATION</div>
+    <div class="os-brand-os">
+      <span class="light">ANALYSIS</span>
+      <span class="bold">OS</span>
     </div>
-    <div class="topbar-actions">
-      <input id="search" class="search" type="search" placeholder="搜索本地歌曲" aria-label="搜索">
-      <select id="langSel" class="lang-sel" title="Language">
-        <option value="zh-CN">简体中文</option>
-        <option value="zh-TW">繁體中文</option>
-        <option value="en">English</option>
-      </select>
-      <button id="importBtn" class="btn-primary" title="导入本地音乐">&#65291; IMPORT</button>
+  </div>
+
+  <!-- Top-Right Frameless Inline Controls -->
+  <header class="topbar-frameless">
+    <div class="filter-pills" role="tablist" aria-label="Filter">
+      <button class="pill-btn active" data-view="all"><span data-i18n="nav.all">全部</span><span class="cnt" id="cntAll">6</span></button>
+      <button class="pill-btn" data-view="audio"><span data-i18n="nav.audio">音樂</span><span class="cnt" id="cntAudio">6</span></button>
+      <button class="pill-btn" data-view="video"><span data-i18n="nav.video">影片</span><span class="cnt" id="cntVideo">0</span></button>
     </div>
+
+    <input id="search" class="search-underline" type="search" placeholder="搜尋檔案..." aria-label="Search">
+
+    <button id="themeBtn" class="inline-ctrl" title="Switch Theme">
+      <span class="theme-dot"></span>
+      <span id="themeLabel">CERAMIC</span>
+    </button>
+
+    <select id="langSel" class="lang-inline" title="Language">
+      <option value="zh-TW">繁體中文</option>
+      <option value="zh-CN">简体中文</option>
+      <option value="en">English</option>
+    </select>
+
+    <button id="importBtn" class="btn-import">+ <span data-i18n="import">導入</span></button>
   </header>
 
-  <div class="layout">
-    <aside class="side">
-      <div class="side-title">AUDIO ARCHIVE</div>
-      <button class="side-item active" data-view="all"><span data-i18n="nav.all">全部歌曲</span> <span class="cnt" id="allCount">0</span></button>
-      <button class="side-item" data-view="audio"><span data-i18n="nav.audio">本地音乐</span> <span class="cnt" id="audioCount">0</span></button>
-      <button class="side-item" data-view="video"><span data-i18n="nav.video">视频</span> <span class="cnt" id="videoCount">0</span></button>
-      <div class="side-title second">ABOUT</div>
-      <p class="side-note" data-i18n="about">档案终端 · 本地播放</p>
-    </aside>
-
-    <main class="main">
-      <!-- 视频播放模块 -->
-      <section id="videoPanel" class="video-panel">
-        <video id="videoEl" playsinline></video>
-        <div class="video-top">
-          <span id="videoTitle" class="video-title"></span>
-          <div class="video-actions">
-            <button id="webFsBtn" class="vbtn" title="网页全屏">&#9636; <span data-i18n="webFull">网页全屏</span></button>
-            <button id="fullBtn" class="vbtn" title="全屏">&#9974; <span data-i18n="full">全屏</span></button>
-            <button id="closeVideoBtn" class="vbtn" title="关闭">&#10005;</button>
-          </div>
-        </div>
-        <div class="video-controls">
-          <button id="videoPlay" class="vbtn big" title="播放/暂停">&#9654;</button>
-          <span id="videoCur" class="time">00:00</span>
-          <div id="videoProgress" class="progress" role="slider" aria-label="进度" tabindex="0">
-            <div id="videoProgressFill" class="fill"></div>
-            <div id="videoProgressThumb" class="thumb"></div>
-          </div>
-          <span id="videoDur" class="time">--:--</span>
-        </div>
-      </section>
-
-      <div class="main-head">
-        <h1 id="mainTitle">全部歌曲</h1>
-        <span id="mainCount" class="sub"></span>
+  <!-- 3D-to-2D Projected Rhine Lab Reticle Callout -->
+  <div id="calloutLayer" aria-hidden="true">
+    <span class="reticle-dot" id="dotTL"></span>
+    <span class="reticle-dot" id="dotBL"></span>
+    <span class="reticle-dot" id="dotTR"></span>
+    <span class="reticle-dot" id="dotBR"></span>
+    <div class="callout-anchor" id="calloutAnchor">
+      <div class="callout-label-top" id="calloutFileNum">FILE NUMBER: RL-001</div>
+      <div class="callout-dot-origin"></div>
+      <div class="callout-line"></div>
+      <div class="callout-meta-bottom">
+        <div class="callout-track-title" id="calloutTitle">Alabaster Horizon</div>
+        <div class="callout-track-sub" id="calloutSub">RHINE LAB ACOUSTIC DIV. · SYNTH ARCHIVE</div>
       </div>
-      <div class="list-head">
-        <span class="col-op"></span>
-        <span class="col-title" data-i18n="title">标题</span>
-        <span class="col-dur" data-i18n="duration">时长</span>
-      </div>
-      <div id="songList" class="song-list"></div>
-      <div id="empty" class="empty">
-        <div class="empty-ico" aria-hidden="true">&#9835;</div>
-        <div id="emptyTitle" data-i18n="empty.title">暂无歌曲</div>
-        <div class="empty-sub" id="emptySub" data-i18n="empty.sub">点击右上角「导入」，或直接把音频/视频文件拖进页面</div>
-      </div>
-    </main>
+    </div>
   </div>
 
-  <!-- 音乐动态条（科技感镜像频谱） -->
-  <div class="viz-strip" aria-hidden="true">
-    <canvas id="visualizer" class="visualizer"></canvas>
-  </div>
+  <!-- Soft Borderless Atmospheric Veil + Frosted Blur for Detail Inspection Mode -->
+  <div id="detailBackdrop" aria-hidden="true"></div>
 
-  <footer class="playbar" id="playbar">
-    <i class="corner tl" aria-hidden="true"></i><i class="corner tr" aria-hidden="true"></i><i class="corner bl" aria-hidden="true"></i><i class="corner br" aria-hidden="true"></i>
-    <div class="pb-left">
-      <div class="cover" id="cover"><span class="cover-letter" id="coverLetter">&#9835;</span><span class="disc" aria-hidden="true"></span></div>
-      <div class="pb-info">
-        <div class="pb-title" id="pbTitle">未播放</div>
-        <div class="pb-artist" id="pbArtist">—</div>
+  <!-- Foreground Transparent 3D Showcase Canvas (renders sharp Hero Album above blurred rack) -->
+  <canvas id="showcaseCanvas" aria-hidden="true"></canvas>
+
+  <!-- Frameless Detail Inspection Mode Overlay -->
+  <section id="detailLayer" aria-label="Archive Detail Inspector">
+    <button id="backBtn" class="detail-back">
+      <span>&#8592;</span>
+      <span data-i18n="backRack">返回檔案架</span>
+      <span class="kbd-badge">ESC</span>
+    </button>
+
+    <div class="detail-cue">
+      <div class="detail-cue-id" id="cueFileId">FILE // RL-001</div>
+      <div class="detail-cue-sub" data-i18n="dragCue">拖動卡片，查看完整封面</div>
+    </div>
+
+    <div class="dossier">
+      <div class="dossier-top-row">
+        <div class="dossier-id" id="dossierId">ARCHIVE // RL-001</div>
+        <nav class="dossier-tabs" role="tablist">
+          <button class="dtab active" data-tab="tracks" data-i18n="tab.tracks">歌單</button>
+          <button class="dtab" data-tab="details" data-i18n="tab.details">檔案詳情</button>
+          <button class="dtab" data-tab="lyrics" data-i18n="tab.lyrics">歌詞</button>
+          <button class="dtab" data-tab="video" data-i18n="tab.video">影像</button>
+        </nav>
+      </div>
+
+      <div class="dossier-title-block">
+        <div class="dossier-title-main">
+          <h1 class="dossier-title" id="dossierTitle">Alabaster Horizon</h1>
+          <div class="dossier-artist" id="dossierArtist">Rhine Lab Acoustic Div.</div>
+        </div>
+        <div class="dossier-actions">
+          <button id="changeCoverBtn" class="action-ghost" data-i18n="changeCover">更換封面</button>
+          <button id="dossierPlayBtn" class="action-play-pill">&#9654; <span data-i18n="playNow">播放</span></button>
+        </div>
+      </div>
+
+      <div class="meta-grid">
+        <div>
+          <div class="meta-item-label">FORMAT / <span data-i18n="meta.format">格式</span></div>
+          <div class="meta-item-val" id="metaFormat">SYNTH / PCM</div>
+        </div>
+        <div>
+          <div class="meta-item-label">DURATION / <span data-i18n="meta.duration">時長</span></div>
+          <div class="meta-item-val" id="metaDuration">02:40</div>
+        </div>
+        <div>
+          <div class="meta-item-label">SIZE / <span data-i18n="meta.size">大小</span></div>
+          <div class="meta-item-val" id="metaSize">REALTIME</div>
+        </div>
+        <div>
+          <div class="meta-item-label">SOURCE / <span data-i18n="meta.source">來源</span></div>
+          <div class="meta-item-val" id="metaSource">RHINE CORE</div>
+        </div>
+        <div>
+          <div class="meta-item-label">SAMPLE / <span data-i18n="meta.sample">編碼</span></div>
+          <div class="meta-item-val" id="metaSample">48.0 kHz · 32-bit</div>
+        </div>
+        <div>
+          <div class="meta-item-label">MODE / <span data-i18n="meta.mode">狀態</span></div>
+          <div class="meta-item-val" id="metaMode">STANDBY</div>
+        </div>
+      </div>
+
+      <div class="dossier-body">
+        <!-- Tab 1: Tracklist -->
+        <div class="dpane active" id="pane-tracks">
+          <div id="trackListEl"></div>
+        </div>
+
+        <!-- Tab 2: Dossier Details -->
+        <div class="dpane" id="pane-details">
+          <div class="dossier-prose" id="dossierNotes"></div>
+        </div>
+
+        <!-- Tab 3: Lyrics -->
+        <div class="dpane" id="pane-lyrics">
+          <div class="dossier-lyrics" id="dossierLyrics"></div>
+        </div>
+
+        <!-- Tab 4: Video Monitor -->
+        <div class="dpane" id="pane-video">
+          <div id="videoStageWrap" class="video-stage-wrap" style="display:none;">
+            <video id="videoEl" playsinline></video>
+            <div class="video-bar">
+              <button id="vPlayBtn" class="v-mini-btn">&#9654;</button>
+              <span id="vCur" style="font-family:var(--mono);font-size:10px;">00:00</span>
+              <div id="vProgress" class="razor-progress" style="flex:1;margin:0;">
+                <div id="vFill" class="fill"></div>
+                <div id="vThumb" class="thumb"></div>
+              </div>
+              <span id="vDur" style="font-family:var(--mono);font-size:10px;">--:--</span>
+              <button id="vWebFsBtn" class="v-mini-btn" data-i18n="webFull">網頁全屏</button>
+              <button id="vFsBtn" class="v-mini-btn" data-i18n="full">全屏</button>
+            </div>
+          </div>
+          <div id="videoEmptyNote" class="video-empty-note" data-i18n="videoEmpty">目前檔案為音訊格式。導入本地影片檔即可於此播放無邊框影像。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ultra-Minimal Borderless Floating Playbar -->
+  <footer class="playbar-frameless">
+    <div class="viz-progress-zone">
+      <canvas id="visualizer"></canvas>
+      <div id="progressBar" class="razor-progress" role="slider" aria-label="Seek" tabindex="0">
+        <div id="progressFill" class="fill"></div>
+        <div id="progressThumb" class="thumb"></div>
       </div>
     </div>
 
-    <div class="pb-center">
-      <div class="pb-controls">
-        <button id="modeBtn" class="ctrl mode" title="播放模式">顺序</button>
-        <button id="prev" class="ctrl" title="上一首" aria-label="上一首">&#9198;</button>
-        <button id="play" class="ctrl big" title="播放/暂停" aria-label="播放/暂停">&#9654;</button>
-        <button id="next" class="ctrl" title="下一首" aria-label="下一首">&#9197;</button>
-      </div>
-      <div class="pb-progress">
-        <span id="curTime" class="time">00:00</span>
-        <div id="progress" class="progress" role="slider" aria-label="进度" tabindex="0">
-          <div id="progressFill" class="fill"></div>
-          <div id="progressThumb" class="thumb"></div>
+    <div class="pb-row">
+      <div class="pb-left" id="pbTrackTrigger" title="Inspect current cartridge">
+        <img id="pbThumb" class="pb-thumb" alt="Cover">
+        <div class="pb-meta">
+          <div class="pb-title" id="pbTitle">Alabaster Horizon</div>
+          <div class="pb-sub" id="pbSub">RL-001 · Rhine Lab Acoustic Div.</div>
         </div>
-        <span id="durTime" class="time">--:--</span>
       </div>
-    </div>
 
-    <div class="pb-right">
-      <button id="queueBtn" class="ctrl" title="播放队列">&#8801; <span class="queue-badge" id="queueCount"></span></button>
-      <div class="vol">
-        <span class="vol-ico" aria-hidden="true">&#128266;</span>
-        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="音量">
+      <div class="pb-center">
+        <button id="modeBtn" class="ctrl-btn mode-btn">順序</button>
+        <button id="prevBtn" class="ctrl-btn" aria-label="Previous">&#9198;</button>
+        <button id="playBtn" class="ctrl-btn play-btn" aria-label="Play / Pause">&#9654;</button>
+        <button id="nextBtn" class="ctrl-btn" aria-label="Next">&#9197;</button>
+        <span class="time-readout" id="timeReadout">00:00 / 02:40</span>
+      </div>
+
+      <div class="pb-right">
+        <div class="vol-wrap">
+          <span class="vol-ico" aria-hidden="true">&#128266;</span>
+          <input id="volSlider" type="range" min="0" max="1" step="0.01" value="0.72" aria-label="Volume">
+        </div>
+        <div class="watermark" aria-hidden="true">
+          <span>POWERED BY <strong>RHINE LAB</strong></span>
+          <span class="watermark-bar"></span>
+        </div>
       </div>
     </div>
   </footer>
 
-  <div id="drawer" class="drawer">
-    <i class="corner tl" aria-hidden="true"></i><i class="corner tr" aria-hidden="true"></i><i class="corner bl" aria-hidden="true"></i><i class="corner br" aria-hidden="true"></i>
-    <div class="drawer-head">
-      <span data-i18n="queue">播放队列</span>
-      <span class="drawer-actions">
-        <button id="clearAll" class="link-btn" data-i18n="clear">清空</button>
-        <button id="closeDrawer" class="link-btn" aria-label="关闭">&#10005;</button>
-      </span>
-    </div>
-    <div id="queueList" class="queue-list"></div>
-    <div class="drawer-now">
-      <div class="disc-big" id="discBig">&#9835;</div>
-      <div class="drawer-title" id="drawerTitle">未播放</div>
-      <div class="drawer-artist" id="drawerArtist">—</div>
-      <div class="drawer-lyrics" id="lyrics" data-i18n="lyrics.none">暂无歌词（本地文件不包含歌词）</div>
+  <!-- Full-Window Drag & Drop Overlay -->
+  <div id="dropOverlay" aria-hidden="true">
+    <div class="drop-reticle">
+      <div class="drop-title" id="dropTitle" data-i18n="drop.title">掛載本地媒體至萊茵三維檔案架</div>
+      <div class="drop-sub" id="dropSub" data-i18n="drop.sub">鬆開以自動解析封面與音訊 / 影片檔案（詳情模式可拖入圖片更換封面）</div>
     </div>
   </div>
 
+  <!-- Non-blocking HUD Toast -->
+  <div id="hudToast" role="status" aria-live="polite"></div>
+
+  <!-- Hidden File Inputs -->
   <input id="fileInput" type="file" multiple accept="audio/*,video/*,.mp3,.flac,.wav,.ogg,.oga,.opus,.m4a,.aac,.aif,.aiff,.webm,.mp4,.ogv,.mov,.m4v" style="display:none">
-  <script src="renderer.js"></script>
+  <input id="coverInput" type="file" accept="image/*" style="display:none">
+
+  <script src="app.js"></script>
 </body>
 </html>
