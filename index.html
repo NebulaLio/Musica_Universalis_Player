@@ -3,40 +3,51 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RHINE LAB · AUDIO ARCHIVE — ANALYSIS OS 3D</title>
+  <title>MUSICA UNIVERSALIS · 3D COSMIC AUDIO ARCHIVE</title>
   <!-- Three.js r128 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Noto+Serif+TC:wght@500;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <!-- Sleek Rhine Lab Ring Boot Loader -->
+<body class="theme-cosmos">
+  <!-- Orbital Harmonic Boot Loader -->
   <div id="loader" aria-hidden="true">
-    <div class="loader-ring">
-      <svg viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(128,128,128,0.22)" stroke-width="1.2"></circle>
-        <circle class="lr-arc" cx="32" cy="32" r="26" fill="none" stroke="#ff7b00" stroke-width="1.8" stroke-dasharray="163" stroke-dashoffset="163"></circle>
-        <circle cx="32" cy="32" r="3.4" fill="#ff7b00"></circle>
+    <div class="loader-orrery">
+      <svg viewBox="0 0 96 96">
+        <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(120,170,255,0.16)" stroke-width="1"></circle>
+        <circle class="lr-arc-outer" cx="48" cy="48" r="40" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="251" stroke-dashoffset="251"></circle>
+        <circle cx="48" cy="48" r="27" fill="none" stroke="rgba(120,170,255,0.22)" stroke-width="1" stroke-dasharray="4 5"></circle>
+        <circle class="lr-arc-inner" cx="48" cy="48" r="16" fill="none" stroke="var(--accent-2)" stroke-width="1.5" stroke-dasharray="100" stroke-dashoffset="100"></circle>
+        <circle cx="48" cy="48" r="4.2" fill="var(--accent)"></circle>
+        <circle cx="48" cy="8" r="2.2" fill="var(--accent-2)"></circle>
       </svg>
     </div>
-    <div class="loader-brand">RHINE LAB</div>
-    <div class="loader-sub" id="loaderSub">INITIALIZING ARCHIVE</div>
+    <div class="loader-brand">MUSICA UNIVERSALIS</div>
+    <div class="loader-sub" id="loaderSub">CALIBRATING HARMONIC COSMOS…</div>
   </div>
 
-  <!-- Full-Bleed 3D Endless Cartridge Rack -->
+  <!-- Full-Bleed 3D Music Universe Canvas -->
   <div id="sceneWrap">
     <canvas id="threeCanvas"></canvas>
   </div>
+  <div class="cosmos-vignette" aria-hidden="true"></div>
   <div class="grain-overlay" aria-hidden="true"></div>
   <div class="hud-fade-top" aria-hidden="true"></div>
   <div class="hud-fade-bottom" aria-hidden="true"></div>
 
-  <!-- Top-Left Frameless Rhine Lab Branding -->
-  <div class="os-brand" aria-label="Rhine Lab Analysis OS">
-    <div class="os-brand-main">RHINE LAB</div>
-    <div class="os-brand-sub">SYNTHESIZE INFORMATION</div>
-    <div class="os-brand-os">
-      <span class="light">ANALYSIS</span>
-      <span class="bold">OS</span>
+  <!-- Top-Left Music-Interactive Kinetic Typography HUD -->
+  <div id="musicKineticHud" class="kinetic-hud" role="region" aria-label="Now Resonating">
+    <div class="kinetic-eyebrow">
+      <span class="kinetic-pulse-dot" id="kineticPulseDot" aria-hidden="true"></span>
+      <span class="kinetic-mood-text" id="kineticMoodText">暖珀微光 · 溫潤療癒</span>
+      <span class="kinetic-state-badge" id="kineticStateBadge">STANDBY</span>
+    </div>
+    <div id="kineticTitle" class="kinetic-title" role="button" tabindex="0" title="點擊切換播放 / 暫停並觸發聲場共振">Event Horizon Overture</div>
+    <div class="kinetic-sub-row">
+      <span id="kineticArtist" class="kinetic-artist">Nebula Harmonic Ensemble</span>
+      <canvas id="miniWaveCanvas" class="kinetic-wave" width="110" height="18" aria-hidden="true"></canvas>
     </div>
   </div>
 
@@ -44,15 +55,24 @@
   <header class="topbar-frameless">
     <div class="filter-pills" role="tablist" aria-label="Filter">
       <button class="pill-btn active" data-view="all"><span data-i18n="nav.all">全部</span><span class="cnt" id="cntAll">6</span></button>
-      <button class="pill-btn" data-view="audio"><span data-i18n="nav.audio">音樂</span><span class="cnt" id="cntAudio">6</span></button>
-      <button class="pill-btn" data-view="video"><span data-i18n="nav.video">影片</span><span class="cnt" id="cntVideo">0</span></button>
+      <button class="pill-btn" data-view="audio"><span data-i18n="nav.audio">星軌音訊</span><span class="cnt" id="cntAudio">6</span></button>
+      <button class="pill-btn" data-view="video"><span data-i18n="nav.video">星際影像</span><span class="cnt" id="cntVideo">0</span></button>
     </div>
 
-    <input id="search" class="search-underline" type="search" placeholder="搜尋檔案..." aria-label="Search">
+    <input id="search" class="search-underline" type="search" placeholder="搜尋星軌檔案..." aria-label="Search">
 
-    <button id="themeBtn" class="inline-ctrl" title="Switch Theme">
+    <button id="orbitBtn" class="inline-ctrl active" title="Toggle Auto-Orbit">
+      <span class="orbit-dot"></span>
+      <span id="orbitLabel">ORBIT</span>
+    </button>
+
+    <button id="resetCamBtn" class="inline-ctrl" title="Reset Cosmic View">
+      <span data-i18n="resetView">歸位</span>
+    </button>
+
+    <button id="themeBtn" class="inline-ctrl" title="Switch Cosmic Theme">
       <span class="theme-dot"></span>
-      <span id="themeLabel">CERAMIC</span>
+      <span id="themeLabel">COSMOS</span>
     </button>
 
     <select id="langSel" class="lang-inline" title="Language">
@@ -61,60 +81,65 @@
       <option value="en">English</option>
     </select>
 
-    <button id="importBtn" class="btn-import">+ <span data-i18n="import">導入</span></button>
+    <button id="importBtn" class="btn-import">+ <span data-i18n="import">匯入星體</span></button>
   </header>
 
-  <!-- 3D-to-2D Projected Rhine Lab Reticle Callout -->
+  <!-- Subtle Bottom-Left Navigation Hint (Galaxy View) -->
+  <div class="galaxy-hint" aria-hidden="true">
+    <span data-i18n="galaxyHint">拖曳環繞音樂宇宙 · 滾輪縮放星域 · 下滑播放欄進入沉浸模式</span>
+  </div>
+
+  <!-- 3D-to-2D Projected Celestial Reticle Callout -->
   <div id="calloutLayer" aria-hidden="true">
-    <span class="reticle-dot" id="dotTL"></span>
-    <span class="reticle-dot" id="dotBL"></span>
-    <span class="reticle-dot" id="dotTR"></span>
-    <span class="reticle-dot" id="dotBR"></span>
+    <span class="reticle-corner rc-tl" id="dotTL"></span>
+    <span class="reticle-corner rc-bl" id="dotBL"></span>
+    <span class="reticle-corner rc-tr" id="dotTR"></span>
+    <span class="reticle-corner rc-br" id="dotBR"></span>
     <div class="callout-anchor" id="calloutAnchor">
-      <div class="callout-label-top" id="calloutFileNum">FILE NUMBER: RL-001</div>
+      <div class="callout-label-top" id="calloutFileNum">SECTOR // MU-001 · ORBIT 01</div>
       <div class="callout-dot-origin"></div>
       <div class="callout-line"></div>
       <div class="callout-meta-bottom">
-        <div class="callout-track-title" id="calloutTitle">Alabaster Horizon</div>
-        <div class="callout-track-sub" id="calloutSub">RHINE LAB ACOUSTIC DIV. · SYNTH ARCHIVE</div>
+        <div class="callout-track-title" id="calloutTitle">Event Horizon Overture</div>
+        <div class="callout-track-sub" id="calloutSub">NEBULA HARMONIC ENSEMBLE · COSMIC SYNTH</div>
       </div>
     </div>
   </div>
 
-  <!-- Soft Borderless Atmospheric Veil + Frosted Blur for Detail Inspection Mode -->
+  <!-- Soft Atmospheric Veil + Frosted Blur for Detail Inspection Mode -->
   <div id="detailBackdrop" aria-hidden="true"></div>
 
-  <!-- Foreground Transparent 3D Showcase Canvas (renders sharp Hero Album above blurred rack) -->
+  <!-- Foreground Transparent 3D Showcase Canvas (renders sharp Hero Record + Spinning Vinyl above blurred cosmos) -->
   <canvas id="showcaseCanvas" aria-hidden="true"></canvas>
 
   <!-- Frameless Detail Inspection Mode Overlay -->
-  <section id="detailLayer" aria-label="Archive Detail Inspector">
+  <section id="detailLayer" aria-label="Celestial Archive Inspector">
     <button id="backBtn" class="detail-back">
       <span>&#8592;</span>
-      <span data-i18n="backRack">返回檔案架</span>
+      <span data-i18n="backCosmos">返回音樂宇宙</span>
       <span class="kbd-badge">ESC</span>
     </button>
 
     <div class="detail-cue">
-      <div class="detail-cue-id" id="cueFileId">FILE // RL-001</div>
-      <div class="detail-cue-sub" data-i18n="dragCue">拖動卡片，查看完整封面</div>
+      <div class="detail-cue-id" id="cueFileId">SECTOR // MU-001</div>
+      <div class="detail-cue-sub" data-i18n="dragCue">拖曳星碟，自由旋轉檢視封面與律動黑膠</div>
     </div>
 
     <div class="dossier">
       <div class="dossier-top-row">
-        <div class="dossier-id" id="dossierId">ARCHIVE // RL-001</div>
+        <div class="dossier-id" id="dossierId">COSMOS // MU-001</div>
         <nav class="dossier-tabs" role="tablist">
-          <button class="dtab active" data-tab="tracks" data-i18n="tab.tracks">歌單</button>
-          <button class="dtab" data-tab="details" data-i18n="tab.details">檔案詳情</button>
-          <button class="dtab" data-tab="lyrics" data-i18n="tab.lyrics">歌詞</button>
-          <button class="dtab" data-tab="video" data-i18n="tab.video">影像</button>
+          <button class="dtab active" data-tab="tracks" data-i18n="tab.tracks">星軌歌單</button>
+          <button class="dtab" data-tab="details" data-i18n="tab.details">星體檔案</button>
+          <button class="dtab" data-tab="lyrics" data-i18n="tab.lyrics">星語歌詞</button>
+          <button class="dtab" data-tab="video" data-i18n="tab.video">全息影像</button>
         </nav>
       </div>
 
       <div class="dossier-title-block">
         <div class="dossier-title-main">
-          <h1 class="dossier-title" id="dossierTitle">Alabaster Horizon</h1>
-          <div class="dossier-artist" id="dossierArtist">Rhine Lab Acoustic Div.</div>
+          <h1 class="dossier-title" id="dossierTitle">Event Horizon Overture</h1>
+          <div class="dossier-artist" id="dossierArtist">Nebula Harmonic Ensemble</div>
         </div>
         <div class="dossier-actions">
           <button id="changeCoverBtn" class="action-ghost" data-i18n="changeCover">更換封面</button>
@@ -125,26 +150,26 @@
       <div class="meta-grid">
         <div>
           <div class="meta-item-label">FORMAT / <span data-i18n="meta.format">格式</span></div>
-          <div class="meta-item-val" id="metaFormat">SYNTH / PCM</div>
+          <div class="meta-item-val" id="metaFormat">COSMIC SYNTH</div>
         </div>
         <div>
           <div class="meta-item-label">DURATION / <span data-i18n="meta.duration">時長</span></div>
-          <div class="meta-item-val" id="metaDuration">02:40</div>
+          <div class="meta-item-val" id="metaDuration">02:48</div>
         </div>
         <div>
-          <div class="meta-item-label">SIZE / <span data-i18n="meta.size">大小</span></div>
-          <div class="meta-item-val" id="metaSize">REALTIME</div>
+          <div class="meta-item-label">ORBIT / <span data-i18n="meta.orbit">軌道層</span></div>
+          <div class="meta-item-val" id="metaOrbit">RING 01 · INNER</div>
         </div>
         <div>
           <div class="meta-item-label">SOURCE / <span data-i18n="meta.source">來源</span></div>
-          <div class="meta-item-val" id="metaSource">RHINE CORE</div>
+          <div class="meta-item-val" id="metaSource">PULSAR CORE</div>
         </div>
         <div>
-          <div class="meta-item-label">SAMPLE / <span data-i18n="meta.sample">編碼</span></div>
+          <div class="meta-item-label">ENCODING / <span data-i18n="meta.sample">編碼</span></div>
           <div class="meta-item-val" id="metaSample">48.0 kHz · 32-bit</div>
         </div>
         <div>
-          <div class="meta-item-label">MODE / <span data-i18n="meta.mode">狀態</span></div>
+          <div class="meta-item-label">TELEMETRY / <span data-i18n="meta.mode">狀態</span></div>
           <div class="meta-item-val" id="metaMode">STANDBY</div>
         </div>
       </div>
@@ -155,7 +180,7 @@
           <div id="trackListEl"></div>
         </div>
 
-        <!-- Tab 2: Dossier Details -->
+        <!-- Tab 2: Celestial Dossier Details -->
         <div class="dpane" id="pane-details">
           <div class="dossier-prose" id="dossierNotes"></div>
         </div>
@@ -165,30 +190,35 @@
           <div class="dossier-lyrics" id="dossierLyrics"></div>
         </div>
 
-        <!-- Tab 4: Video Monitor -->
+        <!-- Tab 4: Holographic Video Monitor -->
         <div class="dpane" id="pane-video">
           <div id="videoStageWrap" class="video-stage-wrap" style="display:none;">
             <video id="videoEl" playsinline></video>
             <div class="video-bar">
               <button id="vPlayBtn" class="v-mini-btn">&#9654;</button>
-              <span id="vCur" style="font-family:var(--mono);font-size:10px;">00:00</span>
+              <span id="vCur" class="v-time">00:00</span>
               <div id="vProgress" class="razor-progress" style="flex:1;margin:0;">
                 <div id="vFill" class="fill"></div>
                 <div id="vThumb" class="thumb"></div>
               </div>
-              <span id="vDur" style="font-family:var(--mono);font-size:10px;">--:--</span>
+              <span id="vDur" class="v-time">--:--</span>
               <button id="vWebFsBtn" class="v-mini-btn" data-i18n="webFull">網頁全屏</button>
               <button id="vFsBtn" class="v-mini-btn" data-i18n="full">全屏</button>
             </div>
           </div>
-          <div id="videoEmptyNote" class="video-empty-note" data-i18n="videoEmpty">目前檔案為音訊格式。導入本地影片檔即可於此播放無邊框影像。</div>
+          <div id="videoEmptyNote" class="video-empty-note" data-i18n="videoEmpty">目前星體為音訊格式。匯入本地影片檔即可於此播放無邊框全息影像。</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Ultra-Minimal Borderless Floating Playbar -->
-  <footer class="playbar-frameless">
+  <!-- Ultra-Minimal Borderless Floating Playbar (Swipe/Slide Down for Immersive Mode) -->
+  <footer class="playbar-frameless" id="playbar">
+    <div id="playbarHandle" class="pb-handle" role="button" tabindex="0" aria-label="下滑收起播放欄" title="下滑或點擊收起播放欄，進入沉浸模式 (H)">
+      <span class="pb-handle-pill"></span>
+      <span class="pb-handle-chev" aria-hidden="true">&#8964;</span>
+    </div>
+
     <div class="viz-progress-zone">
       <canvas id="visualizer"></canvas>
       <div id="progressBar" class="razor-progress" role="slider" aria-label="Seek" tabindex="0">
@@ -198,11 +228,11 @@
     </div>
 
     <div class="pb-row">
-      <div class="pb-left" id="pbTrackTrigger" title="Inspect current cartridge">
+      <div class="pb-left" id="pbTrackTrigger" title="Inspect active celestial record">
         <img id="pbThumb" class="pb-thumb" alt="Cover">
         <div class="pb-meta">
-          <div class="pb-title" id="pbTitle">Alabaster Horizon</div>
-          <div class="pb-sub" id="pbSub">RL-001 · Rhine Lab Acoustic Div.</div>
+          <div class="pb-title" id="pbTitle">Event Horizon Overture</div>
+          <div class="pb-sub" id="pbSub">MU-001 · Nebula Harmonic Ensemble</div>
         </div>
       </div>
 
@@ -211,7 +241,7 @@
         <button id="prevBtn" class="ctrl-btn" aria-label="Previous">&#9198;</button>
         <button id="playBtn" class="ctrl-btn play-btn" aria-label="Play / Pause">&#9654;</button>
         <button id="nextBtn" class="ctrl-btn" aria-label="Next">&#9197;</button>
-        <span class="time-readout" id="timeReadout">00:00 / 02:40</span>
+        <span class="time-readout" id="timeReadout">00:00 / 02:48</span>
       </div>
 
       <div class="pb-right">
@@ -220,18 +250,25 @@
           <input id="volSlider" type="range" min="0" max="1" step="0.01" value="0.72" aria-label="Volume">
         </div>
         <div class="watermark" aria-hidden="true">
-          <span>POWERED BY <strong>RHINE LAB</strong></span>
+          <span>ORBITAL ENGINE BY <strong>MUSICA UNIVERSALIS</strong></span>
           <span class="watermark-bar"></span>
         </div>
       </div>
     </div>
   </footer>
 
+  <!-- Minimal Floating Pull-Up Tab when Playbar is Slid Down (Immersive Mode) -->
+  <div id="playbarRestore" class="pb-restore" role="button" tabindex="0" aria-label="展開播放欄" title="點擊或向上滑動恢復播放欄 (H)">
+    <span class="pb-restore-pulse" aria-hidden="true"></span>
+    <span class="pb-restore-bar" aria-hidden="true"></span>
+    <span class="pb-restore-label" data-i18n="restoreBar">展開播放欄</span>
+  </div>
+
   <!-- Full-Window Drag & Drop Overlay -->
   <div id="dropOverlay" aria-hidden="true">
     <div class="drop-reticle">
-      <div class="drop-title" id="dropTitle" data-i18n="drop.title">掛載本地媒體至萊茵三維檔案架</div>
-      <div class="drop-sub" id="dropSub" data-i18n="drop.sub">鬆開以自動解析封面與音訊 / 影片檔案（詳情模式可拖入圖片更換封面）</div>
+      <div class="drop-title" id="dropTitle" data-i18n="drop.title">將本地媒體注入音樂宇宙軌道</div>
+      <div class="drop-sub" id="dropSub" data-i18n="drop.sub">鬆開以自動解析封面與音訊 / 影片檔案（詳情模式可直接拖入圖片更換封面）</div>
     </div>
   </div>
 
@@ -242,6 +279,13 @@
   <input id="fileInput" type="file" multiple accept="audio/*,video/*,.mp3,.flac,.wav,.ogg,.oga,.opus,.m4a,.aac,.aif,.aiff,.webm,.mp4,.ogv,.mov,.m4v" style="display:none">
   <input id="coverInput" type="file" accept="image/*" style="display:none">
 
+  <!-- Modular Application Scripts (Compatible with both file:// and HTTP servers) -->
+  <script src="i18n.js"></script>
+  <script src="covers.js"></script>
+  <script src="color-psychology.js"></script>
+  <script src="audio-engine.js"></script>
+  <script src="music-cosmos-fx.js"></script>
+  <script src="cosmos-scene.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
